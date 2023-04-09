@@ -4,5 +4,8 @@ mod warcraft {
     pub mod query_protocol;
 }
 
+use std::env;
+
 fn main() {
+    let args: Vec<String> = env::args().collect();
 }
