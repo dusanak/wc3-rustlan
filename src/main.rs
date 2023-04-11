@@ -1,12 +1,5 @@
-mod warcraft {
-    pub mod expansion;
-    pub mod game_info;
-    pub mod query_protocol;
-}
-
-mod net {
-    pub mod info_client;
-}
+mod warcraft;
+mod net;
 
 use std::{
     env,
