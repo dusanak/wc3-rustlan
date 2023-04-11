@@ -119,8 +119,6 @@ fn decrypt(data: &[u8]) -> Vec<u8> {
 
 #[cfg(test)]
 mod tests {
-    use crate::warcraft::{expansion, game_info};
-
     use super::*;
 
     #[test]
