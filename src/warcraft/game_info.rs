@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GameInfo {
     pub game_id: i32,
     pub name: String,

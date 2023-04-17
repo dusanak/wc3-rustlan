@@ -2,11 +2,11 @@ use std::str::from_utf8;
 
 use super::{expansion::Expansion, game_info::GameInfo};
 
-pub fn get_game_cancelled_packet(game_id: u8) -> [u8; 8] {
-    [0xf7, 0x33, 0x08, 0x00, game_id, 0x00, 0x00, 0x00]
+pub fn get_game_cancelled_packet(game_id: &u8) -> [u8; 8] {
+    [0xf7, 0x33, 0x08, 0x00, *game_id, 0x00, 0x00, 0x00]
 }
 
-pub fn get_game_announce_packet(game_info: GameInfo) -> [u8; 16] {
+pub fn get_game_announce_packet(game_info: &GameInfo) -> [u8; 16] {
     [
         0xf7,
         0x32,
@@ -105,12 +105,10 @@ fn decrypt(data: &[u8]) -> Vec<u8> {
 
         if pos % 8 == 0 {
             mask = b;
+        } else if (mask & (0x1 << (pos % 8))) == 0 {
+            output.push(b - 1);
         } else {
-            if (mask & (0x1 << (pos % 8))) == 0 {
-                output.push(b - 1);
-            } else {
-                output.push(b);
-            }
+            output.push(b);
         }
         pos += 1;
     }
@@ -179,6 +177,6 @@ mod tests {
             player_slots: 2,
         };
 
-        assert_eq!(game_announce_packet, get_game_announce_packet(game_info));
+        assert_eq!(game_announce_packet, get_game_announce_packet(&game_info));
     }
 }
