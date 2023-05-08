@@ -7,7 +7,10 @@ use std::{
 use crate::warcraft::{
     expansion::Expansion,
     game_info::GameInfo,
-    query_protocol::{extract_game_info, get_browse_packet, get_game_announce_packet, change_game_info_packet_port},
+    query_protocol::{
+        change_game_info_packet_port, extract_game_info, get_browse_packet,
+        get_game_announce_packet,
+    },
 };
 
 pub struct InfoClient {
@@ -17,9 +20,12 @@ pub struct InfoClient {
 
 impl InfoClient {
     pub fn new(port: u16) -> Self {
-        let socket = UdpSocket::bind(format!("0.0.0.0:{}", port)).expect("Failed to bind UDP socket.");
+        let socket =
+            UdpSocket::bind(format!("0.0.0.0:{}", port)).expect("Failed to bind UDP socket.");
         socket.set_broadcast(true).unwrap();
-        socket.set_read_timeout(Some(Duration::from_secs(3))).unwrap();
+        socket
+            .set_read_timeout(Some(Duration::from_secs(3)))
+            .unwrap();
         Self {
             socket,
             last_game_info_packet: None,
@@ -76,14 +82,17 @@ impl InfoClient {
                         self.advertise_server(&game_info);
                         self.last_game_info_packet = Some(buf[..received].to_vec());
                     }
-                    
+
                     // browse packet
                     if buf[0] == 0xf7 && buf[1] == 0x2f {
                         // println!("Browse packet received.");
-                        
+
                         if let Some(packet) = &self.last_game_info_packet {
                             let mut packet = packet.clone();
-                            change_game_info_packet_port(self.socket.local_addr().unwrap().port(), &mut packet);
+                            change_game_info_packet_port(
+                                self.socket.local_addr().unwrap().port(),
+                                &mut packet,
+                            );
                             self.socket.send_to(&packet, addr).unwrap();
                         }
                     }

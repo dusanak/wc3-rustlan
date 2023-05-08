@@ -5,7 +5,7 @@ use std::{env, net::TcpListener, thread::spawn};
 
 use net::info_client::InfoClient;
 
-use crate::net::tcp_proxy::{self, TcpProxy};
+use crate::net::tcp_proxy::TcpProxy;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -16,7 +16,7 @@ fn main() {
     }
 
     let listener = TcpListener::bind("0.0.0.0:0").unwrap();
-    
+
     let port = listener.local_addr().unwrap().port();
 
     let addr = args[1].clone();
