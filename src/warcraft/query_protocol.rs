@@ -84,6 +84,11 @@ pub fn extract_game_info(response: &[u8]) -> Option<GameInfo> {
     })
 }
 
+pub fn change_game_info_packet_port(port: u16, game_info_packet: &mut Vec<u8>) {
+    let port_bytes = port.to_ne_bytes();
+    game_info_packet.splice(game_info_packet.len() - 2.., port_bytes);
+}
+
 fn extract_string(response: &[u8]) -> String {
     let mut end_index = 0;
     while response[end_index] != 0 {

@@ -27,6 +27,7 @@ impl TcpProxy {
                     self.server.write(&buf[..received]).unwrap();
                 },
                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {},
+                Err(ref e) if e.kind() == io::ErrorKind::ConnectionAborted => break,
                 Err(e) => panic!("encountered IO error: {e}"),
             }
 
@@ -35,8 +36,11 @@ impl TcpProxy {
                     self.client.write(&buf[..received]).unwrap();
                 },
                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {},
+                Err(ref e) if e.kind() == io::ErrorKind::ConnectionAborted => break,
                 Err(e) => panic!("encountered IO error: {e}"),
             }
         }
+
+        println!("Connection with {} aborted.", self.server.peer_addr().unwrap());
     }
 }

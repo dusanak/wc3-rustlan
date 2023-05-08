@@ -7,7 +7,7 @@ use std::{
 use crate::warcraft::{
     expansion::Expansion,
     game_info::GameInfo,
-    query_protocol::{extract_game_info, get_browse_packet, get_game_announce_packet},
+    query_protocol::{extract_game_info, get_browse_packet, get_game_announce_packet, change_game_info_packet_port},
 };
 
 pub struct InfoClient {
@@ -76,12 +76,15 @@ impl InfoClient {
                         self.advertise_server(&game_info);
                         self.last_game_info_packet = Some(buf[..received].to_vec());
                     }
-
+                    
                     // browse packet
                     if buf[0] == 0xf7 && buf[1] == 0x2f {
                         // println!("Browse packet received.");
+                        
                         if let Some(packet) = &self.last_game_info_packet {
-                            self.socket.send_to(packet, addr).unwrap();
+                            let mut packet = packet.clone();
+                            change_game_info_packet_port(self.socket.local_addr().unwrap().port(), &mut packet);
+                            self.socket.send_to(&packet, addr).unwrap();
                         }
                     }
                 }
