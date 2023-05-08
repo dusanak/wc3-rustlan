@@ -1,7 +1,6 @@
 use std::{
     io,
     net::{SocketAddrV4, UdpSocket},
-    thread::sleep,
     time::Duration,
 };
 
@@ -27,7 +26,7 @@ impl InfoClient {
         }
     }
 
-    pub fn start(&mut self, address: &str) {
+    pub fn start(&mut self, address: String) {
         let addr: SocketAddrV4 = address.parse().unwrap_or_else(|_| -> SocketAddrV4 {
             println!("Defaulting to port 6112.");
             SocketAddrV4::new(address.parse().expect("Failed to parse IP address"), 6112)
