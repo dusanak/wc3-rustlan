@@ -12,8 +12,8 @@ pub struct TcpProxy {
 
 impl TcpProxy {
     pub fn new(address: String, client: TcpStream) -> Self {
-        let server = TcpStream::connect(address).unwrap();
-        println!("Connected to remote server.");
+        let server = TcpStream::connect(&address).unwrap();
+        println!("Connected to remote server {}.", address); 
 
         // client.set_nonblocking(true).unwrap();
         // server.set_nonblocking(true).unwrap();
