@@ -1,7 +1,7 @@
 use std::{
-    io,
+    io::{self, ErrorKind::WouldBlock},
     net::{SocketAddrV4, UdpSocket},
-    time::Duration,
+    time::Duration, sync::mpsc::{self, TryRecvError},
 };
 
 use crate::warcraft::{
@@ -32,7 +32,7 @@ impl InfoClient {
         }
     }
 
-    pub fn start(&mut self, address: String) {
+    pub fn start(&mut self, address: String, rx: mpsc::Receiver<()>) {
         let addr: SocketAddrV4 = address.parse().unwrap_or_else(|_| -> SocketAddrV4 {
             println!("Defaulting to port 6112.");
             SocketAddrV4::new(address.parse().expect("Failed to parse IP address"), 6112)
@@ -41,6 +41,14 @@ impl InfoClient {
         loop {
             self.send_browse_packet(&addr);
             self.process_responses();
+
+            match rx.try_recv() {
+                Ok(_) | Err(TryRecvError::Disconnected) => {
+                    println!("Stopping server advertisement.");
+                    break;
+                }
+                Err(TryRecvError::Empty) => {}
+            }
         }
     }
 
@@ -76,9 +84,9 @@ impl InfoClient {
 
                     // game info packet
                     if buf[0] == 0xf7 && buf[1] == 0x30 {
-                        // println!("Game info received.");
                         let game_info = extract_game_info(&buf[..received])
-                            .expect("Failed to extract game info.");
+                        .expect("Failed to extract game info.");
+                        println!("Game info received: {}", game_info.name);
                         self.advertise_server(&game_info);
                         self.last_game_info_packet = Some(buf[..received].to_vec());
                     }
@@ -97,7 +105,7 @@ impl InfoClient {
                         }
                     }
                 }
-                Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
+                Err(ref e) if e.kind() == WouldBlock => {
                     // println!("No more responses found.");
                     break;
                 }

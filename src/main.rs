@@ -1,7 +1,7 @@
 mod net;
 mod warcraft;
 
-use std::{env, net::TcpListener, thread::spawn};
+use std::{env, net::TcpListener, thread::spawn, sync::mpsc};
 
 use net::info_client::InfoClient;
 
@@ -15,18 +15,24 @@ fn main() {
         return;
     }
 
+    println!("WC3 RustLAN started.");
+
     let listener = TcpListener::bind("0.0.0.0:0").unwrap();
 
-    let port = listener.local_addr().unwrap().port();
+    println!("Remote server address is {}.", args[1]);
+
+    let (tx, rx) = mpsc::channel();
 
     let addr = args[1].clone();
+    let port = listener.local_addr().unwrap().port();
     let info_client_handle = spawn(move || {
         let mut info_client = InfoClient::new(port);
-        info_client.start(addr);
+        info_client.start(addr, rx);
     });
 
     let (client, sock) = listener.accept().unwrap();
     println!("Accepted connection from {}", sock);
+    _ = tx.send(());
 
     let addr = args[1].clone();
     let tcp_proxy_handle = spawn(move || {
